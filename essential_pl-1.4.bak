@@ -20,9 +20,9 @@
   (if (< n 0)
       (error TOO_SMALL_ERROR n)
       (if (zero? n)
-          empty
-          (cons x
-                (duple (- n 1) x)))))
+           empty
+           (cons x
+                 (duple (- n 1) x)))))
 
 
 
@@ -64,12 +64,12 @@
               (list 'd 'b 'c 'a))
 (check-expect (swapper 'a 'd  (list 'a 'b empty 'c 'd))
               (list 'd 'b empty 'c 'a))
-;(check-expect (swapper empty 'd (list 'a 'b empty 'c 'd))
-;              (list 'a 'b 'd 'c empty))  ;; possible but complicated to make work
+(check-expect (swapper empty 'd  (list 'a 'b empty 'c 'd))
+              (list 'd 'b 'c 'a))
 (check-expect (swapper 'a 'd (list (list 'a) 'b (list (list 'c) empty) 'd))
               (list (list 'd) 'b (list (list 'c) empty) 'a))
-; (check-expect (swapper invert reverse (list reverse)) (list invert)) ;; cannot compare
-;; function equality with eqv?
+(check-expect (swapper invert reverse (list reverse)) (list invert))
+
 
 (define (swapper s1 s2 slist)
   (if (empty? slist)
@@ -82,48 +82,4 @@
 (check-expect (replace-exp 'a 'b 'a) 'b)
 (check-expect (replace-exp 'a 'b 'b) 'a)
 (check-expect (replace-exp 'a empty 'a) empty)
-(check-expect (replace-exp 'a 'b (list 'a 'b)) (list 'b 'a))
-(check-expect (replace-exp 'a 'b (list (list 'b 'b) 'a 'd))
-              (list (list 'a 'a) 'b 'd))
-(check-expect (replace-exp 'a 'a (list 'a 'a)) (list 'a 'a))
-;(check-expect (replace-exp (list 'a) 'a (list 'a (list 'a)))
-;              (list (list 'a) 'a)) ; !!! this produces a bizarre result - step through 
-
-(define (replace-exp x y elt)
-  (if (symbol? elt)
-      (if (equal? elt x)
-          y
-          (if (eqv? elt y)
-              x
-              elt))
-      (swapper x y elt)))
-
-;; oh, whoops, only slist is s-list
-
-;; list-set: List X Integer X SchemeValue -> List
-;; replace nth element with x
-(check-error (list-set empty 0 'a))
-(check-error (list-set (list 'a 'b 'c) 3 'a))
-(check-expect (list-set (list 'a 'b 'c) 1 'd) (list 'a 'd 'c))
-(check-expect (list-set (list 'a 'b 'c) 2 3) (list 'a 'b 3))
-(check-expect (list-set (list 'a 'b 'c) 0 'd) (list 'd 'b 'c))
-
-;; classic me not doing the cross-product table - this empty? isn't needed
-;; as if we get to a point where we didn't evaluate n = 0 but it's empty
-;; then that automatically means too big
-#;
-(define (list-set lst n x)
-  (if (empty? lst)
-      (if (= -1 n)
-          empty
-          (error "The index is out-of-bounds"))
-      (if (= 0 n)
-          (cons x (rest lst))
-          (cons (first lst) (list-set (rest lst) (- n 1) x)))))
-
-(define (list-set lst n x)
-  (if (empty? lst)
-      (error "The index is out-of-bounds")
-      (if (= 0 n)
-          (cons x (rest lst))
-          (cons (first lst) (list-set (rest lst) (- n 1) x)))))
+(check-expect (replace-exp 'a 'b (list 'a 'b)) (list '
