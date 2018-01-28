@@ -127,3 +127,55 @@
       (if (= 0 n)
           (cons x (rest lst))
           (cons (first lst) (list-set (rest lst) (- n 1) x)))))
+
+
+;; count-occurrences: way too much of a classic 110 problem
+
+(define-struct testresult (expected input1 input2))
+;; product: ListofSymbol X ListofSymbol -> ListOf(ListOfSymbol)?
+;; cartesian product
+;; another classic cross-product tables one
+(check-expect (product empty empty) empty)
+(check-expect (product empty (list 1 2)) empty)
+
+
+(check-expect (product (list 'a 'b 12 5 'c) (list '1 3))
+              (list (list 'a 1) (list 'a 3) (list 'b 1) (list 'b 3)
+                    (list 12 1) (list 12 3) (list 5 1) (list 5 3) (list 'c 1) (list 'c 3)))
+
+#;
+(check-satisfied (make-testresult
+                  (list (list 'a '1) (list 'b '1) (list 12 '1) (list 5 '1) (list 'c '1)
+                        (list 'a 3) (list 'b 3) (list 12 3) (list 5 3) (list 'c 3))
+                  (list 'a 'b 12 5 'c) (list '1 3))
+                 product-contains-all)
+
+
+(define (product lst1 lst2)
+  (if (empty? lst1)
+      empty
+      (append (expand (first lst1) lst2)
+              (product (rest lst1) lst2))))
+
+(check-expect (expand 'a (list 'a 'b)) (list (list 'a 'a) (list 'a 'b)))
+(define (expand x lox)
+  (if (empty? lox)
+      empty
+      (cons (list x (first lox))
+            (expand x (rest lox)))))
+      
+
+
+
+;; for testing purposes
+(check-expect (product-contains-all
+               (make-testresult
+                (list (list 'a 'b) (list 'a 1))
+                (list 'a)
+                (list 'b 1))) true)
+
+(define (product-contains-all tr)
+    (andmap (λ (elt) (member elt
+                             (product (testresult-input1 tr)
+                                      (testresult-input2 tr))))
+            (testresult-expected tr)))
