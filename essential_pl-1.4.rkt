@@ -167,15 +167,97 @@
 
 
 
-;; for testing purposes
+;; for testing purposes but doesn't currently work...
+#;
 (check-expect (product-contains-all
                (make-testresult
                 (list (list 'a 'b) (list 'a 1))
                 (list 'a)
                 (list 'b 1))) true)
-
+#;
 (define (product-contains-all tr)
-    (andmap (λ (elt) (member elt
-                             (product (testresult-input1 tr)
-                                      (testresult-input2 tr))))
-            (testresult-expected tr)))
+  (andmap (λ (elt) (member elt
+                           (product (testresult-input1 tr)
+                                    (testresult-input2 tr))))
+          (testresult-expected tr)))
+
+
+;; filter-in: (SchemeValue -> Boolean) X ListOfSchemeValue
+;; return elements satisfying pred
+(check-expect (filter-in symbol? (list 'a 2 (list 1 3) 'b make-testresult))
+              (list 'a 'b))
+(check-expect (filter-in number? (list 1 3 (list 2 1) (make-testresult 1 2 3))) (list 1 3))
+
+(define (filter-in pred? lst)
+  ;  (filter pred lst))
+  ; hm... that implementation would be too easier
+  (if (empty? lst)
+      empty
+      (if (pred? (first lst))
+          (cons (first lst) (filter-in pred? (rest lst)))
+          (filter-in pred? (rest lst)))))
+
+
+;; okay, I already implemented these built-ins when I took the course the first time
+(check-expect (flatten (list 1 2 3)) (list 1 2 3))
+(check-expect (flatten (list empty (list 1) (list 2 (list 3))))
+              (list 1 2 3))
+(define (flatten lst)
+  (if (empty? lst)
+      empty
+      (if (list? (first lst))
+          (append (flatten (first lst)) (flatten (rest lst)))
+          (cons (first lst) (flatten (rest lst))))))
+
+
+;;merge (sort)
+(check-expect (merge (list 1 4) (list 1 2 8))
+              (list 1 1 2 4 8))
+(check-expect (merge (list 35 62 81 90 91) (list 3 83 85 90))
+              (list 3 35 62 81 83 85 90 90 91))
+(check-expect (merge empty (list 1 2)) (list 1 2))
+
+(define (merge lst1 lst2)
+  (if (or (empty? lst1) (empty? lst2))
+      (append lst1 lst2)
+      (if (<= (first lst1) (first lst2))
+          (cons (first lst1) (merge (rest lst1) lst2))
+          (cons (first lst2) (merge lst1 (rest lst2))))))
+
+;; sorting we did already
+
+;; path - takes an int n and bst that has n
+;; return the left-right to show how to find n
+;; if n is root, empty list
+
+;; BST is one of
+;; - false
+;; - (make-bst Int BST BST)
+(define-struct bst (node ltree rtree))
+
+;; should probably follow the definition a bit more closely
+(check-expect (path 4 (make-bst 4 false false)) empty)
+(check-expect (path 4 false) false)
+(check-expect (path 4 (make-bst 5 false false)) false)
+(check-expect (path 4 (make-bst 5
+                              (make-bst 3 false
+                                        (make-bst 4 false false))
+                              (make-bst 7
+                                        (make-bst 6 false false)
+                                        (make-bst 8 false false))))
+                    (list "left" "right"))
+
+(define (path n btree)
+  (cond [(false? btree) false]
+        [(= n (bst-node btree)) empty]
+        [(< n (bst-node btree))
+         (if (not (false? (path n (bst-ltree btree))))
+             (cons "left" (path n (bst-ltree btree)))
+             false)]
+        [else
+         (if (not (false? (path n (bst-rtree btree))))
+             (cons "right" (path n (bst-rtree btree)))
+             false)]))
+;; this can definitely be simplified... hm but this is more efficient by taking advantage of bst        
+      
+      
