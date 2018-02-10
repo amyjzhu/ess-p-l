@@ -259,5 +259,37 @@
              (cons "right" (path n (bst-rtree btree)))
              false)]))
 ;; this can definitely be simplified... hm but this is more efficient by taking advantage of bst        
-      
+
+;; number-leaves
+;; produce just the nodes of each tree
+;; if false then just output the node...
+
+;; first just let it output the node
+;; then introduce an accumulator
+(check-expect (number-leaves
+               (make-bst "foo"
+                          (make-bst "bar"
+                                26
+                                12)
+                          (make-bst "baz"
+                                    11
+                                    (make-bst "quux"
+                                              117
+                                              14))) 0)
+              "(foo (bar 0 1) (baz 2 (quux 3 4)))")
+
+
+(define (number-leaves bst n) ;; traversing a tree with an accumulator is generally
+  ;; bad news, but I guess it's strictly increasing here
+  (if (number? bst)
+      (number->string n)
+      (number-leaves-btree bst (+ n 1))))
+
+(define (number-leaves-btree bst n)
+  (string-append " (" (bst-node bst) " "
+                 (number-leaves (bst-rtree bst) n) " "; global tracker...
+                 ; put everything into a trampoline 
+                 (number-leaves (bst-ltree bst) n)
+                 ") "))
+                                
       

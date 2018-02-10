@@ -1,0 +1,90 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-advanced-reader.ss" "lang")((modname difftree) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #t)))
+;; DiffTree is one of:
+;; - "one"
+;; - (make-diff DiffTree DiffTree)
+;; interp. a representation of an integer, where (diff dt1 dt2) = dt1 - dt2
+
+(define-struct diff (tree1 tree2))
+(define ZERO (make-diff "one" "one"))
+(define TWO (make-diff "one" (make-diff (make-diff "one" "one")
+                                        "one")))
+(define NEG-ONE (make-diff (make-diff "one" "one") "one"))
+(define THREE (make-diff TWO NEG-ONE))
+ 
+
+#;
+(define (fn-for-difftree dt)
+  (cond [(and (string? dt)
+              (string=? "one")) ...]
+        [else (... dt
+                   (fn-for-diff (diff-tree1 dt))
+                   (fn-for-diff (diff-tree2 dt)))]))
+
+
+;; -> DiffTree
+;; produces zero
+(check-expect (zero) ZERO)
+
+(define (zero)
+  (make-diff "one" "one"))
+
+;; DiffTree -> Boolean
+;; produce true if a difftree is equal to zero
+(check-expect (is-zero? (make-diff "one" "one")) true)
+(check-expect (is-zero? "one") false)
+(check-expect (is-zero? (make-diff "one" (make-diff "one" "one"))) false)
+(check-expect (is-zero? (make-diff (make-diff "one" "one")
+                                   (make-diff "one" "one"))) true)
+(check-expect (is-zero? (make-diff (make-diff "one" "one")
+                                   (make-diff "one" (make-diff "one" "one")))) false)
+(define (is-zero? dt)
+  (cond [(and (string? dt)
+              (string=? "one" dt)) false]
+        [else (=
+               (diff-sum (diff-tree1 dt))
+               (diff-sum (diff-tree2 dt)))]))
+
+
+;; DiffTree -> Integer
+;; produce the numeral reprsentation of dt
+(check-expect (diff-sum (zero)) 0)
+(check-expect (diff-sum "one") 1)
+(check-expect (diff-sum (make-diff ZERO ZERO)) 0)
+(check-expect (diff-sum NEG-ONE) -1)
+(check-expect (diff-sum (make-diff (make-diff "one" "one")
+                                       (make-diff (make-diff (make-diff (make-diff "one" "one")
+                                                                        "one") "one") "one"))) 3)
+(check-expect (diff-sum THREE) 3)
+
+(define (diff-sum dt)
+  (cond [(and (string? dt) (string=? "one" dt)) 1]
+        [else (- (diff-sum (diff-tree1 dt))
+                 (diff-sum (diff-tree2 dt)))]))
+
+
+;; DiffTree -> DiffTree
+;; produce the next largest integer represented as difftree
+;; use diff-sum as the exact representation may vary
+(check-expect (diff-sum (successor (zero))) 1)
+(check-expect (diff-sum (successor TWO)) 3)
+(check-expect (diff-sum (successor NEG-ONE)) 0)
+(check-expect (diff-sum (successor (make-diff NEG-ONE "one"))) -1)
+(check-expect (successor (make-diff "one" (make-diff "one" "one")))
+              (make-diff 
+               (make-diff "one" (make-diff "one" "one"))
+               NEG-ONE))
+(check-expect (successor (make-diff "one" (make-diff "one" "one")))
+              (make-diff 
+               (make-diff "one" (make-diff "one" "one"))
+               (make-diff (make-diff "one" "one") "one")))
+#; ; manual way
+(define (successor dt)
+  (make-diff dt
+             (make-diff (make-diff "one" "one")
+                        "one")))
+
+(define (successor dt)
+  (make-diff dt
+             NEG-ONE))
