@@ -178,6 +178,23 @@
                    (fold-difftree b1 c1 (diff-tree1 dt))
                    (fold-difftree b1 c1 (diff-tree2 dt)))]))
 
+;; DiffTree DiffTree -> DiffTree
+;; add
+(check-expect (diff-sum (add ZERO ZERO)) 0)
+(check-expect (diff-sum (add "one" ZERO)) 1)
+(check-expect (diff-sum (add NEG-ONE NEG-ONE)) -2)
+(check-expect (diff-sum (add NEG-ONE THREE)) 2)
+(check-expect (add ZERO THREE)
+              (make-diff ZERO
+                         (make-diff (make-diff "one" "one")
+                                    THREE)))
+
+(define (add dt1 dt2)
+  (make-diff dt1
+             (make-diff ZERO
+                        dt2)))
+           
+
 
 ;; DiffTree -> DiffTree
 ;; produce the nth fibonnaci number as difftree
