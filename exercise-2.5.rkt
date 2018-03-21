@@ -56,3 +56,17 @@
                 (if (eqv? (vp-var (env-vp env)) var)
                     (vp-val (env-vp env))
                     (apply-env var (env-env env)))))
+
+
+;; exercise 2.8
+(check-expect (empty-env? empty) true)
+(check-expect (empty-env? (make-env (make-vp false "Dog")
+                                         (make-env (make-vp "Cat" 5) empty))) false)
+
+(define (empty-env? env)
+  (if (env? env)
+      false
+      (empty? env)))
+
+(define (has-binding? var env)
+  true)
